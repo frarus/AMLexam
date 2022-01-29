@@ -80,7 +80,7 @@ def main(params):
         model = torch.nn.DataParallel(model).cuda()
 
     print('load model from %s ...' % args.checkpoint_path)
-    checkpoint = torch.load(args.checkpoint.path)
+    checkpoint = torch.load(args.checkpoint_path)
     # load pretrained model if exists
     if 'best' in args.checkpoint_path:
         print ("The best epoch is {}". format(checkpoint['epoch']))
