@@ -82,7 +82,7 @@ def main(params):
     print('load model from %s ...' % args.checkpoint_path)
     checkpoint = torch.load(args.checkpoint.path)
     # load pretrained model if exists
-    if 'latest' in args.checkpoint_path:
+    if 'best' in args.checkpoint_path:
         print ("The best epoch is {}". format(checkpoint['epoch']))
     
     model.load_state_dict(checkpoint['model_state_dict'])
