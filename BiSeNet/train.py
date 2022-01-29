@@ -141,23 +141,32 @@ def train(args, model, optimizer, dataloader_train, dataloader_val):
         loss_train_mean = np.mean(loss_record)
         writer.add_scalar('epoch/loss_epoch_train', float(loss_train_mean), epoch)
         print('loss for train : %f' % (loss_train_mean))
-        if epoch % args.checkpoint_step == 0 and epoch != 0:
-            import os
-            if not os.path.isdir(args.save_model_path):
-                os.mkdir(args.save_model_path)
-            torch.save(model.module.state_dict(),
-                       os.path.join(args.save_model_path, 'latest_crossentropy_loss.pth'))
 
-        if epoch % args.validation_step == 0 and epoch != 0:
-            precision, miou = val(args, model, dataloader_val)
-            if miou > max_miou:
-                max_miou = miou
-                import os 
-                os.makedirs(args.save_model_path, exist_ok=True)
-                torch.save(model.module.state_dict(),
-                           os.path.join(args.save_model_path, 'best_crossentropy_loss.pth'))
-            writer.add_scalar('epoch/precision_val', precision, epoch)
-            writer.add_scalar('epoch/miou val', miou, epoch)
+        #if epoch % args.checkpoint_step == 0 and epoch != 0:
+            #import os
+            #if not os.path.isdir(args.save_model_path):
+                #os.mkdir(args.save_model_path)
+        torch.save({'epoch': epoch,
+                    'model_state_dict': model.module.state_dict(),
+                    'optimizer_state_dict': optimizer.state_dict(),
+                    'loss': loss,
+                    'loss_record': loss_record},
+                    os.path.join(args.save_model_path, 'latest_crossentropy_loss.pth'))
+
+        #if epoch % args.validation_step == 0 and epoch != 0:
+        precision, miou = val(args, model, dataloader_val)
+        if miou > max_miou:
+            max_miou = miou
+            import os 
+            os.makedirs(args.save_model_path, exist_ok=True)
+            torch.save({'epoch': epoch,
+                    'model_state_dict': model.module.state_dict(),
+                    'optimizer_state_dict': optimizer.state_dict(),
+                    'loss': loss,
+                    'loss_record': loss_record},
+                    os.path.join(args.save_model_path, 'best_crossentropy_loss.pth'))
+        writer.add_scalar('epoch/precision_val', precision, epoch)
+        writer.add_scalar('epoch/miou val', miou, epoch)
 
 
 def main(params):

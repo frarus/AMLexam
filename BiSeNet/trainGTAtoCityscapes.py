@@ -139,8 +139,7 @@ def main(params):
     parser.add_argument("--learning_rate_D", type=float, default=1e-4, help="Base learning rate for discriminator.")
     parser.add_argument("--lambda_seg", type=float, default=0.1, help="lambda_seg.")
     parser.add_argument("--iter_size", type=int, default=125, help="Accumulate gradients for ITER_SIZE iterations.")
-    parser.add_argument("--lambda_adv_target1", type=float, default=0.0002, help="lambda_adv for adversarial training.")
-    parser.add_argument("--lambda_adv_target2", type=float, default=0.001, help="lambda_adv for adversarial training.")
+    parser.add_argument("--lambda_adv", type=float, default=0.001, help="lambda_adv for adversarial training.")
     parser.add_argument("--momentum", type=float, default=0.9, help="Momentum component of the optimiser.")
     parser.add_argument("--not_restore_last", action="store_true", help="Whether to not restore last (FC) layers.")
     parser.add_argument("--num_steps", type=int, default=250000, help="Number of training steps.")
@@ -299,6 +298,7 @@ def main(params):
             #add LAMBDA
             loss_adversarial=bce_loss(D_out, Variable(torch.FloatTensor(D_out.data.size()).fill_(source_label)).cuda())
                                                                   #LOSS ADVERSARIAL
+            loss_adversarial=args.lambda_adv*loss_adversarial
             scaler.scale(loss_adversarial).backward()
             scaler.step(optimizer)
 
@@ -316,7 +316,7 @@ def main(params):
             loss_D_source = bce_loss(D_out,
                               Variable(torch.FloatTensor(D_out.data.size()).fill_(source_label)).cuda())
 
-            #loss_D_value1 += loss_D_source
+            
 
             # train with target
             output_target = output_target.detach()
@@ -326,7 +326,7 @@ def main(params):
             loss_D_target = bce_loss(D_out,
                               Variable(torch.FloatTensor(D_out.data.size()).fill_(target_label)).cuda())
             #DIVIDERE PER 2
-            loss_D = loss_D_source+loss_D_target
+            loss_D = loss_D_source/2+loss_D_target/2
 
             scaler.scale(loss_D).backward()
             scaler.step(optimizer_D)
@@ -336,7 +336,6 @@ def main(params):
             scaler.update()
 
         tq.close() 
-        #optimizer_D.step()
 
         if epoch % args.validation_step == 0 and epoch != 0:
             precision, miou = val(args, model, dataloader_val)
@@ -367,7 +366,7 @@ if __name__ == '__main__':
         '--num_classes', '19',
         '--cuda', '0',
         '--batch_size', '4',
-        '--save_model_path', '/content/drive/MyDrive/checkpoints_101_sgd',
+        '--save_model_path', '/content/drive/MyDrive/checkpoints_101_sgd_da',
         '--context_path', 'resnet101',  # set resnet18 or resnet101, only support resnet18 and resnet101
         '--optimizer', 'sgd',
         '--loss', 'crossentropy', #fine parametri train, ora metto quelli di train gta cityscapes

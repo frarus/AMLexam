@@ -368,7 +368,7 @@ if __name__ == '__main__':
         '--cuda', '0',
         '--batch_size', '2',
         '--iter_size', '250',
-        '--save_model_path', '/content/drive/MyDrive/checkpoints_101_sgd',
+        '--save_model_path', '/content/drive/MyDrive/checkpoints_101_sgd_da_DSC',
         '--context_path', 'resnet101',  # set resnet18 or resnet101, only support resnet18 and resnet101
         '--optimizer', 'sgd',
         '--loss', 'crossentropy', #fine parametri train, ora metto quelli di train gta cityscapes

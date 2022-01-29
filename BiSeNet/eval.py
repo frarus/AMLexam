@@ -79,19 +79,23 @@ def main(params):
     if torch.cuda.is_available() and args.use_gpu:
         model = torch.nn.DataParallel(model).cuda()
 
-    # load pretrained model if exists
     print('load model from %s ...' % args.checkpoint_path)
-    model.module.load_state_dict(torch.load(args.checkpoint_path))
+    checkpoint = torch.load(args.checkpoint.path)
+    # load pretrained model if exists
+    if 'latest' in args.checkpoint_path:
+        print ("The best epoch is {}". format(checkpoint['epoch']))
+    
+    model.load_state_dict(checkpoint['model_state_dict'])
     print('Done!')
 
-    # get label info
-    # label_info = get_label_info(csv_path)
-    # test
     eval(model, dataloader, args)
 
 
 if __name__ == '__main__':
     params = [
+        #LAST CASE
+        #'--checkpoint_path', '/content/drive/MyDrive/checkpoints_101_sgd/latest_crossentropy_loss.pth',
+        #BEST CASE
         '--checkpoint_path', '/content/drive/MyDrive/checkpoints_101_sgd/best_crossentropy_loss.pth',
         '--data', '/path/to/data',
         '--cuda', '0',
