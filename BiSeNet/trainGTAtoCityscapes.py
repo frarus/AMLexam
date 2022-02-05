@@ -248,6 +248,7 @@ def main(params):
         adjust_learning_rate_D(optimizer_D, epoch, args.learning_rate_D, args.num_epochs, args.power)
         tq = tqdm(total=(len(dataloader_target) + len (dataloader_source)) * args.batch_size)
         tq.set_description('epoch %d, lr %f' % (epoch, lr))
+        loss_record = []
 
         loss_D=0
         loss_segmentation=0
@@ -282,6 +283,7 @@ def main(params):
                 loss_segmentation = loss1 + loss2 + loss3                    #LOSS SEGMENTATION
             
             scaler.scale(loss_segmentation).backward()
+            loss_record.append(loss_segmentation.item())
 
 
             # train with target
@@ -334,27 +336,36 @@ def main(params):
             tq.update(args.batch_size*2)
 
             scaler.update()
-
+        loss_train_mean = np.mean(loss_record)
         tq.close() 
+        writer.add_scalar('epoch/loss_epoch_train', float(loss_train_mean), epoch)
+        print('loss for train : %f' % (loss_train_mean))
 
-        if epoch % args.validation_step == 0 and epoch != 0:
-            precision, miou = val(args, model, dataloader_val)
-            if miou > max_miou:
-                max_miou = miou
-            writer.add_scalar('epoch/precision_val', precision, epoch)
-            writer.add_scalar('epoch/miou val', miou, epoch)
+        torch.save({'epoch': epoch,
+                    'model_state_dict': model.module.state_dict(),
+                    'optimizer_state_dict': optimizer.state_dict(),
+                    'loss': loss_segmentation,
+                    'loss_record': loss_record},
+                    os.path.join(args.save_model_path, 'latest_crossentropy_loss.pth'))
+
+        #if epoch % args.validation_step == 0 and epoch != 0:
+        precision, miou = val(args, model, dataloader_val)
+        if miou > max_miou:
+            max_miou = miou
+            import os 
+            os.makedirs(args.save_model_path, exist_ok=True)
+            torch.save({'epoch': epoch,
+                    'model_state_dict': model.module.state_dict(),
+                    'optimizer_state_dict': optimizer.state_dict(),
+                    'loss': loss_segmentation,
+                    'loss_record': loss_record},
+                    os.path.join(args.save_model_path, 'best_crossentropy_loss.pth'))
+        writer.add_scalar('epoch/precision_val', precision, epoch)
+        writer.add_scalar('epoch/miou val', miou, epoch)
 
         print(
         'iter = {0:8d}/{1:8d}, loss_segmentation = {2:.3f} loss_adversarial = {3:.3f} loss_D = {4:.3f} '.format(
             epoch, args.num_epochs, loss_segmentation, loss_adversarial, loss_D))
-        
-        if epoch >= args.num_epochs - 1:
-            print ('validation of the model')
-            val(args, model, dataloader_val)
-            print ('save model ...')
-            torch.save(model.state_dict(), os.path.join(args.save_model_path, 'GTA5_D.pth'))
-            torch.save(model_D.state_dict(), os.path.join(args.save_model_path, 'GTA5_D1.pth'))
-            break
 
 
 if __name__ == '__main__':
