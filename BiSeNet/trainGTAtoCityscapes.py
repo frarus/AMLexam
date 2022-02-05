@@ -178,6 +178,7 @@ def main(params):
     # Create network
 
     # build model
+    import os
     os.environ['CUDA_VISIBLE_DEVICES'] = args.cuda
     model = BiSeNet(args.num_classes, args.context_path)
     if torch.cuda.is_available() and args.use_gpu:
