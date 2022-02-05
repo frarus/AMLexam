@@ -1,5 +1,7 @@
 import argparse
+from distutils.command import check
 import os
+from xmlrpc.client import Boolean
 import torch.backends.cudnn as cudnn
 import torch
 import torch.cuda.amp as amp
@@ -152,6 +154,7 @@ def main(params):
     parser.add_argument("--set", type=str, default="train",  help="choose adaptation set.")
     parser.add_argument("--gan", type=str, default="Vanilla", help="choose the GAN objective.")
     parser.add_argument("--gpu", type=int, default=0, help="choose gpu device.")
+    parser.add_argument("--continue_train", type=str, default=0, help="continue training starting from a given epoch")
 
     args = parser.parse_args(params)
 
@@ -194,15 +197,9 @@ def main(params):
     else:  # rmsprop
         print('not supported optimizer \n')
         return None
-
-    # load pretrained model if exists
-    if args.pretrained_model_path is not None:
-        print('load model from %s ...' % args.pretrained_model_path)
-        model.module.load_state_dict(torch.load(args.pretrained_model_path))
-        print('Done!')
-
-    #model.train()
-
+    
+    # implement model.optim_parameters(args) to handle different models' lr setting
+    optimizer.zero_grad()
     cudnn.benchmark = True
 
     writer = SummaryWriter(comment=''.format(args.optimizer, args.context_path))
@@ -217,17 +214,7 @@ def main(params):
     # init D
     model_D = FCDiscriminator(num_classes=args.num_classes)
 
-    model_D.train()
-    model_D.cuda()
 
-    if not os.path.exists(args.snapshot_dir):
-        os.makedirs(args.snapshot_dir)
-    if not os.path.exists(args.save_model_path):
-        os.makedirs(args.save_model_path)
-
-    # implement model.optim_parameters(args) to handle different models' lr setting
-
-    optimizer.zero_grad()
 
     optimizer_D = optim.Adam(model_D.parameters(), lr=args.learning_rate_D, betas=(0.9, 0.99))
     optimizer_D.zero_grad()
@@ -238,13 +225,33 @@ def main(params):
     elif args.gan == 'LS':
         bce_loss = torch.nn.MSELoss()
 
+    # load pretrained model if exists
+    if args.continue_train:
+
+        print('load model from %s ...' % os.path.join(args.save_model_path, 'latest_crossentropy_loss.pth'))
+        checkpoint = torch.load(os.path.join(args.save_model_path, 'latest_crossentropy_loss.pth'))
+        model.load_state_dict(checkpoint['model_state_dict'])
+        model_D.load_state_dict(checkpoint['model_state_dict_D'])
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        optimizer_D.load_state_dict(checkpoint['optimizer_state_dict_D'])
+        start_epoch=checkpoint['epoch']
+        print('Done!')
+
+    else: 
+        start_epoch=0
+    #model.train()
+
+    model_D.train()
+    model_D.cuda()
+
+
     # labels for adversarial training
     source_label = 0
     target_label = 1
 
     max_miou = 0
 
-    for epoch in range(args.num_epochs):
+    for epoch in range(start_epoch, args.num_epochs):
         lr = poly_lr_scheduler(optimizer, args.learning_rate, iter=epoch, max_iter=args.num_epochs) #learning rate for generator
         adjust_learning_rate_D(optimizer_D, epoch, args.learning_rate_D, args.num_epochs, args.power)
         tq = tqdm(total=(len(dataloader_target) + len (dataloader_source)) * args.batch_size)
@@ -345,9 +352,12 @@ def main(params):
         torch.save({'epoch': epoch,
                     'model_state_dict': model.module.state_dict(),
                     'optimizer_state_dict': optimizer.state_dict(),
+                    'model_state_dict_D': model_D.module.state_dict(),
+                    'optimizer_state_dict_D': optimizer_D.state_dict(),
                     'loss': loss_segmentation,
                     'loss_record': loss_record},
                     os.path.join(args.save_model_path, 'latest_crossentropy_loss.pth'))
+        
 
         #if epoch % args.validation_step == 0 and epoch != 0:
         precision, miou = val(args, model, dataloader_val)
@@ -371,6 +381,7 @@ def main(params):
 
 if __name__ == '__main__':
     params = [
+        '--continue_train', 'False',
         '--num_epochs', '50',
         '--learning_rate', '2.5e-2',
         '--data', './data/...',
