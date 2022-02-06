@@ -36,20 +36,20 @@ class DiscriminatorDSC(nn.Module):
 
 
 	def forward(self, x):
-		x = self.depthwise1
-		x = self.pointwise1
+		x = self.depthwise1(x)
+		x = self.pointwise1(x)
 		#x = self.conv1(x)
 		x = self.leaky_relu(x)
-		x = self.depthwise2
-		x = self.pointwise2
+		x = self.depthwise2(x)
+		x = self.pointwise2(x)
 		#x = self.conv2(x)
 		x = self.leaky_relu(x)
-		x = self.depthwise3
-		x = self.pointwise3
+		x = self.depthwise3(x)
+		x = self.pointwise3(x)
 		#x = self.conv3(x)
 		x = self.leaky_relu(x)
-		x = self.depthwise4
-		x = self.pointwise4
+		x = self.depthwise4(x)
+		x = self.pointwise4(x)
 		#x = self.conv4(x)
 		x = self.leaky_relu(x)
 		x = self.classifier(x)
