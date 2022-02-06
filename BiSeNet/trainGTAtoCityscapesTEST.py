@@ -198,7 +198,7 @@ def main(params):
     # load pretrained model if exists
     if args.pretrained_model_path is not None:
         print('load model from %s ...' % args.pretrained_model_path)
-        model.module.load_state_dict(torch.load(args.pretrained_model_path))
+        model.load_state_dict(torch.load(args.pretrained_model_path))
         print('Done!')
 
     #model.train()
@@ -343,9 +343,9 @@ def main(params):
         print('loss for train : %f' % (loss_train_mean))
 
         torch.save({'epoch': epoch,
-                    'model_state_dict': model.module.state_dict(),
+                    'model_state_dict': model.state_dict(),
                     'optimizer_state_dict': optimizer.state_dict(),
-                    'model_state_dict': model_D.module.state_dict(),
+                    'model_state_dict': model_D.state_dict(),
                     'optimizer_state_dict': optimizer_D.state_dict(),
                     'loss_segmentation': loss_segmentation,
                     'loss_record': loss_record,
@@ -361,9 +361,9 @@ def main(params):
             import os 
             os.makedirs(args.save_model_path, exist_ok=True)
             torch.save({'epoch': epoch,
-                    'model_state_dict': model.module.state_dict(),
+                    'model_state_dict': model.state_dict(),
                     'optimizer_state_dict': optimizer.state_dict(),
-                    'model_state_dict': model_D.module.state_dict(),
+                    'model_state_dict': model_D.state_dict(),
                     'optimizer_state_dict': optimizer_D.state_dict(),
                     'loss_segmentation': loss_segmentation,
                     'loss_record': loss_record,
