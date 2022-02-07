@@ -343,15 +343,10 @@ def main(params):
         print('loss for train : %f' % (loss_train_mean))
 
         torch.save({'epoch': epoch,
-                    'model_state_dict': model.state_dict(),
+                    'model_state_dict': model.module.state_dict(),
                     'optimizer_state_dict': optimizer.state_dict(),
-                    'model_state_dict': model_D.state_dict(),
-                    'optimizer_state_dict': optimizer_D.state_dict(),
-                    'loss_segmentation': loss_segmentation,
-                    'loss_record': loss_record,
-                    'loss_adversarial': loss_adversarial,
-                    'loss_D_source': loss_D_source,
-                    'loss_D_target': loss_D_target},
+                    'loss': loss_segmentation,
+                    'loss_record': loss_record},
                     os.path.join(args.save_model_path, 'latest_crossentropy_loss.pth'))
 
         #if epoch % args.validation_step == 0 and epoch != 0:
@@ -361,17 +356,10 @@ def main(params):
             import os 
             os.makedirs(args.save_model_path, exist_ok=True)
             torch.save({'epoch': epoch,
-                    'model_state_dict': model.state_dict(),
+                    'model_state_dict': model.module.state_dict(),
                     'optimizer_state_dict': optimizer.state_dict(),
-                    'model_state_dict': model_D.state_dict(),
-                    'optimizer_state_dict': optimizer_D.state_dict(),
-                    'loss_segmentation': loss_segmentation,
-                    'loss_record': loss_record,
-                    'loss_adversarial': loss_adversarial,
-                    'loss_D_source': loss_D_source,
-                    'loss_D_target': loss_D_target,
-                    'miou': miou,
-                    'max_miou': max_miou},
+                    'loss': loss_segmentation,
+                    'loss_record': loss_record},
                     os.path.join(args.save_model_path, 'best_crossentropy_loss.pth'))
         writer.add_scalar('epoch/precision_val', precision, epoch)
         writer.add_scalar('epoch/miou val', miou, epoch)
