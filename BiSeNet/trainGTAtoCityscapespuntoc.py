@@ -301,17 +301,17 @@ def main(params):
 
             #IN CASE WITH PSEUDO-LABELS
             if epoch>0:                              #2 epoca, pseudolabels create
-                _, batch = next(sourceloader_iter)
+                _, batch = next(targetloader_iter)
                 trg_img, trg_lbl, _, _ = batch
                 trg_img = trg_img.cuda()
                 trg_lbl = trg_lbl.long().cuda()
                 with amp.autocast():
                     output_target, output_sup1, output_sup2 = model(trg_img)
-                    loss1 = loss_func(output_source, label)
+                    loss1 = loss_func(output_target, label)
                     loss2 = loss_func(output_sup1, label)
                     loss3 = loss_func(output_sup2, label)
                     loss_seg_trg = loss1 + loss2 + loss3 
-                print ("..")
+                
             
             #WITHOUT PSEUDOLABELS
             else:
@@ -399,7 +399,7 @@ def main(params):
             epoch, args.num_epochs, loss_segmentation, loss_D_trg_fake, loss_D))
         
         if ((epoch+1)%args.update_pseudo_labels==0):
-            create_pseudo_labels(model, args.save_dir_plabels, args.batch_size, args.num_workers)
+            create_pseudo_labels(model, args.save_dir_plabels, args.num_workers, batch_size=1)
 
 
 

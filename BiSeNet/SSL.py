@@ -11,7 +11,7 @@ import numpy as np
 from dataset.Cityscapes import Cityscapes
 from torch.utils.data import DataLoader
 
-def create_pseudo_labels(model, save_dir, batch_size, num_workers):
+def create_pseudo_labels(model, save_dir, num_workers, batch_size):
    
 
     if not os.path.exists(save_dir):
@@ -22,9 +22,8 @@ def create_pseudo_labels(model, save_dir, batch_size, num_workers):
     model.cuda()   
     train_dataset_target = Cityscapes ()
     targetloader = DataLoader(train_dataset_target, batch_size=batch_size, shuffle=True, num_workers=num_workers, drop_last=True)
-
-    predicted_label = np.zeros((len(targetloader), 512, 1024))
-    predicted_prob = np.zeros((len(targetloader), 512, 1024))
+    predicted_label = np.zeros((len(targetloader)*batch_size, 512, 1024))
+    predicted_prob = np.zeros((len(targetloader)*batch_size, 512, 1024))
     image_name = []
     
     for index, batch in enumerate(targetloader):
@@ -55,7 +54,7 @@ def create_pseudo_labels(model, save_dir, batch_size, num_workers):
     print (thres)
     """
     thres= 0.9
-    for index in range(len(targetloader)):
+    for index in range(len(targetloader)*batch_size):
         name = image_name[index]
         label = predicted_label[index]
         prob = predicted_prob[index]
@@ -63,6 +62,6 @@ def create_pseudo_labels(model, save_dir, batch_size, num_workers):
         output = np.asarray(label, dtype=np.uint8)
         output = Image.fromarray(output)
         #print (name)
-        name = name + "gtFine_labelIds.png"
+        name = name + "_gtFine_labelIds.png"
         output.save('%s/%s' % (save_dir, name)) 
     
