@@ -293,7 +293,7 @@ def main(params):
                 loss3 = loss_func(output_sup2, label)
                 loss_segmentation = loss1 + loss2 + loss3                    #LOSS SEGMENTATION
             
-            scaler.scale(loss_segmentation).backward()                      #LOSS = LOSS_SEG_SRC
+            scaler.scale(loss_segmentation).backward()    #LOSS_SEGMENTATION = LOSS_SEG_SRC
             loss_record.append(loss_segmentation.item())
 
 
@@ -307,9 +307,9 @@ def main(params):
                 trg_lbl = trg_lbl.long().cuda()
                 with amp.autocast():
                     output_target, output_sup1, output_sup2 = model(trg_img)
-                    loss1 = loss_func(output_target, label)
-                    loss2 = loss_func(output_sup1, label)
-                    loss3 = loss_func(output_sup2, label)
+                    loss1 = loss_func(output_target, trg_lbl)
+                    loss2 = loss_func(output_sup1, trg_lbl)
+                    loss3 = loss_func(output_sup2, trg_lbl)
                     loss_seg_trg = loss1 + loss2 + loss3 
                 
             
