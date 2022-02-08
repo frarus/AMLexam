@@ -244,9 +244,11 @@ def main(params):
     for epoch in range(args.num_epochs):
 
         if epoch>0:
-            train_dataset_target = Cityscapes ()
+          train_dataset_target = Cityscapes_pseudo()
+            
         else:
-            train_dataset_target = Cityscapes_pseudo()
+          train_dataset_target = Cityscapes ()
+          
         dataloader_target = DataLoader(train_dataset_target, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers, drop_last=True)
        
 
@@ -259,6 +261,9 @@ def main(params):
         loss_D=0
         loss_segmentation=0
         loss_adversarial=0
+        loss_seg_trg=0
+        loss_D_trg_fake=0
+        loss_seg_trg=0
         model.train()
         
         sourceloader_iter = enumerate(dataloader_source)
@@ -295,7 +300,7 @@ def main(params):
             # train with target
 
             #IN CASE WITH PSEUDO-LABELS
-            if args.pseudo_labels:                              #2 epoca, pseudolabels create
+            if epoch>0:                              #2 epoca, pseudolabels create
                 _, batch = next(sourceloader_iter)
                 trg_img, trg_lbl, _, _ = batch
                 trg_img = trg_img.cuda()
@@ -326,7 +331,7 @@ def main(params):
                                                                   #LOSS ADVERSARIAL
             #LOSS_D_TARGET_FAKE=LOSS_ADVERSARIAL
 
-            loss_trg = args.lambda_adv_target * loss_D_trg_fake + loss_seg_trg
+            loss_trg = args.lambda_adv * loss_D_trg_fake + loss_seg_trg
             scaler.scale(loss_trg).backward()               
             scaler.step(optimizer)
 
@@ -365,7 +370,7 @@ def main(params):
         loss_train_mean = np.mean(loss_record)
         tq.close() 
         writer.add_scalar('epoch/loss_epoch_train', float(loss_train_mean), epoch)
-        print('loss for train : %f' % (loss_train_mean))
+        print('average loss for train : %f' % (loss_train_mean))
 
         torch.save({'epoch': epoch,
                     'model_state_dict': model.module.state_dict(),
@@ -391,7 +396,7 @@ def main(params):
 
         print(
         'iter = {0:8d}/{1:8d}, loss_segmentation = {2:.3f} loss_adversarial = {3:.3f} loss_D = {4:.3f} '.format(
-            epoch, args.num_epochs, loss_segmentation, loss_adversarial, loss_D))
+            epoch, args.num_epochs, loss_segmentation, loss_D_trg_fake, loss_D))
         
         if ((epoch+1)%args.update_pseudo_labels==0):
             create_pseudo_labels(model, args.save_dir_plabels, args.batch_size, args.num_workers)

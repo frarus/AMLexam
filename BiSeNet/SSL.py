@@ -1,19 +1,15 @@
-from BiSeNet.model.build_BiSeNet import BiSeNet
+
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
 from torch.utils import data
-from options.test_options import TestOptions
-from data import CreateTrgDataSSLLoader
 from PIL import Image
 import json
 import os.path as osp
 import os
 import numpy as np
-from model import build_BiSeNet
-from dataset import Cityscapes
+from dataset.Cityscapes import Cityscapes
 from torch.utils.data import DataLoader
-from torch.autograd import Variable
 
 def create_pseudo_labels(model, save_dir, batch_size, num_workers):
    
@@ -34,7 +30,7 @@ def create_pseudo_labels(model, save_dir, batch_size, num_workers):
     for index, batch in enumerate(targetloader):
         #if index % 100 == 0:
              #print( '%d processd' % index)
-        image, _, name = batch
+        image, _, _, name = batch
         output = model(Variable(image).cuda())
         output = nn.functional.softmax(output, dim=1)
         output = nn.functional.upsample(output, (512, 1024), mode='bilinear', align_corners=True).cpu().data[0].numpy()
@@ -66,6 +62,7 @@ def create_pseudo_labels(model, save_dir, batch_size, num_workers):
         label[(prob<thres)] = 255  
         output = np.asarray(label, dtype=np.uint8)
         output = Image.fromarray(output)
-        name = name.split("/")[1].replace("leftImg8bit", "gtFine_labelIds")
+        #print (name)
+        name = name + "gtFine_labelIds.png"
         output.save('%s/%s' % (save_dir, name)) 
     
