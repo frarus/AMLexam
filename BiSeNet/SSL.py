@@ -39,7 +39,7 @@ def create_pseudo_labels(model, save_dir, num_workers, batch_size):
         predicted_label[index] = label.copy()
         predicted_prob[index] = prob.copy()
         image_name.append(name[0])
-    """    
+  
     thres = []
     for i in range(19):
         x = predicted_prob[predicted_label==i]
@@ -52,7 +52,7 @@ def create_pseudo_labels(model, save_dir, num_workers, batch_size):
     thres = np.array(thres)
     thres[thres>0.9]=0.9
     print (thres)
-    """
+
     thres= 0.9
     for index in range(len(targetloader)*batch_size):
         name = image_name[index]

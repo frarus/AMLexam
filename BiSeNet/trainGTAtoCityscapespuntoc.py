@@ -166,6 +166,7 @@ def main(params):
     cudnn.enabled = True 
 
     train_dataset_source = GTA5(args.directory_source)
+    train_dataset_target = Cityscapes ()
     val_dataset = Cityscapes (train=False)
 
     # Define here your dataloaders --> target dataloader has been moved
@@ -243,13 +244,10 @@ def main(params):
 
     for epoch in range(args.num_epochs):
 
-        if epoch>0:
+        if epoch>=50:
           train_dataset_target = Cityscapes_pseudo()
-            
-        else:
-          train_dataset_target = Cityscapes ()
-          
-        dataloader_target = DataLoader(train_dataset_target, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers, drop_last=True)
+          dataloader_target = DataLoader(train_dataset_target, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers, drop_last=True)          
+        
        
 
         lr = poly_lr_scheduler(optimizer, args.learning_rate, iter=epoch, max_iter=args.num_epochs) #learning rate for generator
@@ -300,7 +298,7 @@ def main(params):
             # train with target
 
             #IN CASE WITH PSEUDO-LABELS
-            if epoch>0:                              #2 epoca, pseudolabels create
+            if epoch>=50:                              #2 epoca, pseudolabels create
                 _, batch = next(targetloader_iter)
                 trg_img, trg_lbl, _, _ = batch
                 trg_img = trg_img.cuda()
@@ -398,22 +396,22 @@ def main(params):
         'iter = {0:8d}/{1:8d}, loss_segmentation = {2:.3f} loss_adversarial = {3:.3f} loss_D = {4:.3f} '.format(
             epoch, args.num_epochs, loss_segmentation, loss_D_trg_fake, loss_D))
         
-        if ((epoch+1)%args.update_pseudo_labels==0):
+        if ((epoch+1)%args.update_pseudo_labels==0 and epoch>=49):
             create_pseudo_labels(model, args.save_dir_plabels, args.num_workers, batch_size=1)
 
 
 
 if __name__ == '__main__':
     params = [
-        '--save_dir_plabels', '/content/drive/MyDrive/Datasets/pseudolabels',
-        '--num_epochs', '50',
+        '--save_dir_plabels', '/content/drive/MyDrive/Datasets/pseudolabels_3',
+        '--num_epochs', '75',
         '--learning_rate', '2.5e-2',
         '--data', './data/...',
         '--num_workers', '8',
         '--num_classes', '19',
         '--cuda', '0',
         '--batch_size', '4',
-        '--save_model_path', '/content/drive/MyDrive/checkpoints_101_sgd_DSC_withpseudolabels',
+        '--save_model_path', '/content/drive/MyDrive/checkpoints_101_sgd_DSC_withpseudolabels_3',
         '--context_path', 'resnet101',  # set resnet18 or resnet101, only support resnet18 and resnet101
         '--optimizer', 'sgd',
         '--loss', 'crossentropy', #fine parametri train, ora metto quelli di train gta cityscapes

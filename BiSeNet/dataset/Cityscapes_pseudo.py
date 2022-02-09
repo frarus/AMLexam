@@ -34,7 +34,7 @@ class Cityscapes_pseudo(data.Dataset):
         self.class_mapping = self.info['label2train']
         
         PATH = '/content/drive/MyDrive/Datasets/Cityscapes'
-        PATH_LBL = '/content/drive/MyDrive/Datasets/pseudolabels'
+        PATH_LBL = '/content/drive/MyDrive/Datasets/pseudolabels_3'
 
         for name in self.img_ids:
 
@@ -76,8 +76,8 @@ class Cityscapes_pseudo(data.Dataset):
         label = np.asarray(label, np.float32)
 
         # remap the semantic label
-        if not self.ssl:
-            label = encode_segmap(label, self.class_mapping, self.ignore_index)
+        #if not self.ssl:
+            #label = encode_segmap(label, self.class_mapping, self.ignore_index)
 
         size = image.shape
         image = image[:, :, ::-1]
