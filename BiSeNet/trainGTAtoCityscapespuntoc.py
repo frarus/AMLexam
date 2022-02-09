@@ -59,7 +59,7 @@ def val(args, model, dataloader):
         model.eval()
         precision_record = []
         hist = np.zeros((args.num_classes, args.num_classes))
-        for i, (data, label, _, _) in enumerate(dataloader):
+        for i, (data, label, _, name) in enumerate(dataloader):
             label = label.type(torch.LongTensor)
             data = data.cuda()
             label = label.long().cuda()
@@ -71,7 +71,7 @@ def val(args, model, dataloader):
             predict = np.array(predict.cpu())
             img = colour_code_segmentation(predict, label_info)
             img = Image.fromarray(img, 'RGB')
-            img.save("/content/drive/MyDrive/test/out"+str(i)+".jpeg")
+            img.save("/content/drive/MyDrive/test/"+name[0]+".png")
 
 
 
@@ -170,7 +170,7 @@ def main(params):
 
     # Define here your dataloaders --> target dataloader has been moved
     dataloader_source = DataLoader(train_dataset_source, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers, drop_last=True)
-    dataloader_val = DataLoader(val_dataset, shuffle=False, num_workers=args.num_workers)
+    dataloader_val = DataLoader(val_dataset, shuffle=False, num_workers=args.num_workers, batch_size=1)
 
     # Create network
 
