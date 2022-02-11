@@ -8,7 +8,7 @@ from myutils import encode_segmap
 
 class Cityscapes(data.Dataset):
 
-    def __init__(self, path, crop_size=(1024,512), mean=(104.00698793, 116.66876762, 122.67891434), train=True, max_iters=None, ignore_index=255, ssl=None, train_mode=None):
+    def __init__(self, path, pseudo_path=None, crop_size=(1024,512), mean=(104.00698793, 116.66876762, 122.67891434), train=True, max_iters=None, ignore_index=255, ssl=None, train_mode=None):
         self.mean = mean
         self.crop_size = crop_size
         self.train = train
@@ -33,8 +33,10 @@ class Cityscapes(data.Dataset):
           names=name.split('/')[1].split('_')
           name = names[0]+'_'+names[1]+'_'+names[2]
           image_path = os.path.join (path,'images',name+'_leftImg8bit.png')
-          label_path = os.path.join (path,'labels',name+'_gtFine_labelIds.png')
-          
+          if (self.ssl is None):
+            label_path = os.path.join (path,'labels',name+'_gtFine_labelIds.png')
+          else:
+              label_path=os.path.join(pseudo_path, name+'_gtFine_labelIds.png')
           self.files.append({
                 "image": image_path,
                 "label": label_path,

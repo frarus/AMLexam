@@ -226,8 +226,7 @@ def main(params):
 
             loss_adversarial=bce_loss(D_out, Variable(torch.FloatTensor(D_out.data.size()).fill_(source_label)).cuda())
                                                                   #LOSS ADVERSARIAL
-            loss_adversarial=args.lambda_adv*loss_adversarial
-            scaler.scale(loss_adversarial).backward()
+            scaler.scale(args.lambda_adv*loss_adversarial).backward()
             scaler.step(optimizer)
 
             # train D

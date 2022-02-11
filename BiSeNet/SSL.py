@@ -1,34 +1,28 @@
-
-import torch
 import torch.nn as nn
 from torch.autograd import Variable
-from torch.utils import data
 from PIL import Image
-import json
-import os.path as osp
 import os
 import numpy as np
-from dataset.Cityscapes import Cityscapes
 from torch.utils.data import DataLoader
 
-def create_pseudo_labels(model, save_dir, num_workers, batch_size):
+from dataset.Cityscapes import Cityscapes
+
+def create_pseudo_labels(model, args, batch_size):
    
 
-    if not os.path.exists(save_dir):
-        os.makedirs(save_dir)
+    if not os.path.exists(args.save_dir_plabels):
+        os.makedirs(args.save_dir_plabels)
 
 
     model.eval()
     model.cuda()   
-    train_dataset_target = Cityscapes ()
-    targetloader = DataLoader(train_dataset_target, batch_size=batch_size, shuffle=True, num_workers=num_workers, drop_last=True)
+    train_dataset_target = Cityscapes (args.path_target)
+    targetloader = DataLoader(train_dataset_target, batch_size=batch_size, shuffle=True, num_workers=args.num_workers, drop_last=True)
     predicted_label = np.zeros((len(targetloader)*batch_size, 512, 1024))
     predicted_prob = np.zeros((len(targetloader)*batch_size, 512, 1024))
     image_name = []
     
     for index, batch in enumerate(targetloader):
-        #if index % 100 == 0:
-             #print( '%d processd' % index)
         image, _, _, name = batch
         output = model(Variable(image).cuda())
         output = nn.functional.softmax(output, dim=1)
@@ -48,7 +42,6 @@ def create_pseudo_labels(model, save_dir, num_workers, batch_size):
             continue        
         x = np.sort(x)
         thres.append(x[np.int(np.round(len(x)*0.5))])
-    print (thres)
     thres = np.array(thres)
     thres[thres>0.9]=0.9
     print (thres)
@@ -61,7 +54,6 @@ def create_pseudo_labels(model, save_dir, num_workers, batch_size):
         label[(prob<thres)] = 255  
         output = np.asarray(label, dtype=np.uint8)
         output = Image.fromarray(output)
-        #print (name)
         name = name + "_gtFine_labelIds.png"
-        output.save('%s/%s' % (save_dir, name)) 
+        output.save('%s/%s' % (args.save_dir_plabels, name)) 
     
