@@ -91,7 +91,7 @@ def main(params):
     parser.add_argument("--gpu", type=int, default=0, help="choose gpu device.")
     parser.add_argument("--use_DSC", type=int, default=0, help="0 to not use DSC, 1 to use DSC.")
     parser.add_argument("--figure_name", type=str, default="", help="Name of image with mIoU plot. Could be DA or DA_DSC")
-    parser.add_argument("--transformation_on_source", type="str", default=None, help="Could be LAB or FDA. None means no transformation.")
+    parser.add_argument("--transformation_on_source", type=str, default=None, help="Could be LAB or FDA. None means no transformation.")
 
     args = parser.parse_args(params)
 
