@@ -3,18 +3,12 @@ import numpy as np
 from torch.utils import data
 from PIL import Image
 import json
-
-def encode_segmap(mask, mapping, ignore_index):
-    label_copy = ignore_index * np.ones(mask.shape, dtype=np.float32)
-    for k, v in mapping:
-        label_copy[mask == k] = v
-
-    return label_copy
+from myutils import encode_segmap
 
 
 class Cityscapes(data.Dataset):
 
-    def __init__(self, crop_size=(1024,512), mean=(104.00698793, 116.66876762, 122.67891434), train=True, max_iters=None, ignore_index=255, ssl=None, train_mode=None):
+    def __init__(self, path, crop_size=(1024,512), mean=(104.00698793, 116.66876762, 122.67891434), train=True, max_iters=None, ignore_index=255, ssl=None, train_mode=None):
         self.mean = mean
         self.crop_size = crop_size
         self.train = train
@@ -23,28 +17,24 @@ class Cityscapes(data.Dataset):
         self.files = []
         self.ssl = ssl
         self.train_mode = train_mode
+        self.path=path
 
         if self.train: 
-            self.img_ids = [i_id.strip() for i_id in open('/content/drive/MyDrive/Datasets/Cityscapes/train.txt')]
+            self.img_ids = [i_id.strip() for i_id in open(os.join(path, 'train.txt'))]
         else:
-            self.img_ids = [i_id.strip() for i_id in open('/content/drive/MyDrive/Datasets/Cityscapes/val.txt')]
+            self.img_ids = [i_id.strip() for i_id in open(os.join(path, 'val.txt'))]
         if max_iters is not None:
             self.img_ids = self.img_ids * int(np.ceil(float(max_iters) / len(self.img_ids)))
-        self.info = json.load(open('/content/drive/MyDrive/Datasets/Cityscapes/info.json', 'r'))
+        self.info = json.load(open(os.join(path, 'info.json'), 'r'))
         self.class_mapping = self.info['label2train']
-        
-        PATH = '/content/drive/MyDrive/Datasets/Cityscapes'
 
         for name in self.img_ids:
 
           names=name.split('/')[1].split('_')
           name = names[0]+'_'+names[1]+'_'+names[2]
-          image_path = os.path.join (PATH,'images',name+'_leftImg8bit.png')
+          image_path = os.path.join (path,'images',name+'_leftImg8bit.png')
+          label_path = os.path.join (path,'labels',name+'_gtFine_labelIds.png')
           
-          label_path = os.path.join (PATH,'labels',name+'_gtFine_labelIds.png')
-          #print (image_path)
-          #print (label_path)
-          #print (name)
           self.files.append({
                 "image": image_path,
                 "label": label_path,
