@@ -13,7 +13,7 @@ from model.build_BiSeNet import BiSeNet
 from myutils import colour_code_segmentation
 
 def eval(model,dataloader, args):
-    label_info = json.load(open(os.join(args.path_dataset,'info.json'), 'r'))
+    label_info = json.load(open(os.path.join(args.path_dataset,'info.json'), 'r'))
     label_colors=label_info['palette']
     classes=label_info['label']
 
@@ -34,7 +34,7 @@ def eval(model,dataloader, args):
             predict = np.array(predict)
             img = colour_code_segmentation(predict, label_colors)
             img = Image.fromarray(img, 'RGB')
-            img.save(os.join(args.predicted_labels_folder,name[0]+".png"))
+            img.save(os.path.join(args.predicted_labels_folder,name[0]+".png"))
 
             label = label.squeeze()
             if args.loss == 'dice':
@@ -81,8 +81,8 @@ def main(params):
     if torch.cuda.is_available() and args.use_gpu:
         model = torch.nn.DataParallel(model).cuda()
 
-    print('load model from %s ...' % (os.join(args.checkpoint_path, args.pth_file)))
-    checkpoint = torch.load((os.join(args.checkpoint_path, args.pth_file)))
+    print('load model from %s ...' % (os.path.join(args.checkpoint_path, args.pth_file)))
+    checkpoint = torch.load((os.path.join(args.checkpoint_path, args.pth_file)))
     # load pretrained model if exists
     if 'best' in args.pth_file:
         print ("The best epoch is {}". format(checkpoint['epoch']))

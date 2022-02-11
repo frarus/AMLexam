@@ -20,12 +20,12 @@ class Cityscapes(data.Dataset):
         self.path=path
 
         if self.train: 
-            self.img_ids = [i_id.strip() for i_id in open(os.join(path, 'train.txt'))]
+            self.img_ids = [i_id.strip() for i_id in open(os.path.join(path, 'train.txt'))]
         else:
-            self.img_ids = [i_id.strip() for i_id in open(os.join(path, 'val.txt'))]
+            self.img_ids = [i_id.strip() for i_id in open(os.path.join(path, 'val.txt'))]
         if max_iters is not None:
             self.img_ids = self.img_ids * int(np.ceil(float(max_iters) / len(self.img_ids)))
-        self.info = json.load(open(os.join(path, 'info.json'), 'r'))
+        self.info = json.load(open(os.path.join(path, 'info.json'), 'r'))
         self.class_mapping = self.info['label2train']
 
         for name in self.img_ids:
