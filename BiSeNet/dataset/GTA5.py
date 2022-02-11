@@ -1,9 +1,5 @@
-import os
 import os.path as osp
 import numpy as np
-import random
-import matplotlib.pyplot as plt
-import collections
 import torch
 import torchvision
 from torch.utils import data
@@ -18,7 +14,6 @@ class GTA5(data.Dataset):
         self.scale = scale
         self.ignore_label = ignore_label
         self.mean = mean
-        # self.mean_bgr = np.array([104.00698793, 116.66876762, 122.67891434])
         
         self.img_ids = [i_id.strip() for i_id in open(self.list_path)]
         if not max_iters==None:
@@ -29,7 +24,6 @@ class GTA5(data.Dataset):
                               19: 6, 20: 7, 21: 8, 22: 9, 23: 10, 24: 11, 25: 12,
                               26: 13, 27: 14, 28: 15, 31: 16, 32: 17, 33: 18}
 
-        # for split in ["train", "trainval", "val"]:
         for name in self.img_ids:
             img_file = osp.join(self.root, "images/%s" % name)
             label_file = osp.join(self.root, "labels/%s" % name)
@@ -68,16 +62,3 @@ class GTA5(data.Dataset):
         image = image.transpose((2, 0, 1))
 
         return image.copy(), label_copy.copy(), np.array(size), name
-
-
-if __name__ == '__main__':
-    dst = GTA5DataSet("./data", is_transform=True)
-    trainloader = data.DataLoader(dst, batch_size=4)
-    for i, data in enumerate(trainloader):
-        imgs, labels = data
-        if i == 0:
-            img = torchvision.utils.make_grid(imgs).numpy()
-            img = np.transpose(img, (1, 2, 0))
-            img = img[:, :, ::-1]
-            plt.imshow(img)
-            plt.show()

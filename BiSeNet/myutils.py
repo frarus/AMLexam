@@ -15,3 +15,12 @@ def colour_code_segmentation(image, label_values):
     x[x==255]=19
     final[:,:]=colour_codes[x]
     return final
+
+def lr_poly(base_lr, iter, max_iter, power):
+    return base_lr * ((1 - float(iter) / max_iter) ** (power))
+
+def adjust_learning_rate_D(optimizer, i_iter, lrate, num_steps, power):
+    lr = lr_poly(lrate, i_iter, num_steps, power)
+    optimizer.param_groups[0]['lr'] = lr
+    if len(optimizer.param_groups) > 1:
+        optimizer.param_groups[1]['lr'] = lr * 10

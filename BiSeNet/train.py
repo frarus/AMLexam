@@ -8,7 +8,6 @@ import numpy as np
 import torch.cuda.amp as amp
 
 from model.build_BiSeNet import BiSeNet
-from myutils import colour_code_segmentation
 from utils import poly_lr_scheduler
 from utils import reverse_one_hot, compute_global_accuracy, fast_hist, \
     per_class_iu
@@ -123,7 +122,7 @@ def train(args, model, optimizer, dataloader_train, dataloader_val):
     plt.plot(range(args.num_epochs), miou_list)
     plt.xlabel("Epoch #")
     plt.ylabel("mIoU")
-    plt.savefig(os.path.join("/content/drive/MyDrive/figures","mIoU_per_epoch.png"))
+    plt.savefig(os.path.join("/content/drive/MyDrive/figures",args.figure_name))
 
 
 def main(params):
@@ -149,6 +148,7 @@ def main(params):
     parser.add_argument('--save_model_path', type=str, default=None, help='path to save model')
     parser.add_argument('--optimizer', type=str, default='rmsprop', help='optimizer, support rmsprop, sgd, adam')
     parser.add_argument('--loss', type=str, default='crossentropy', help='loss function, dice or crossentropy')
+    parser.add_argument("--figure_name", type=str, default="", help="Name of image with mIoU plot. Could be 101 or 18")
 
     args = parser.parse_args(params)
 
@@ -199,5 +199,6 @@ if __name__ == '__main__':
         '--context_path', 'resnet101',  # set resnet18 or resnet101, only support resnet18 and resnet101
         '--optimizer', 'sgd',
         '--loss', 'crossentropy',
+        '--figure_name', 'mIoU_per_epoch_101.png'
     ]
     main(params)

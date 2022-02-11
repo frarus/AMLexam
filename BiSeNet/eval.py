@@ -105,6 +105,6 @@ if __name__ == '__main__':
         '--context_path', 'resnet101',
         '--num_classes', '19',
         '--batch_size','1',
-        '--predicted_labels_folder', '/content/drive/MyDrive/predicted_labels',
+        '--predicted_labels_folder', '/content/drive/MyDrive/predicted_labels_101',
     ]
     main(params)
