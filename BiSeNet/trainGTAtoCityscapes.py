@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 
 from loss import DiceLoss
 from model.discriminator import FCDiscriminator
-from model.discriminator_DSC import DiscriminatorDSC
+from model.discriminator_dsc import DiscriminatorDSC
 from dataset.Cityscapes import Cityscapes
 from dataset.GTA5 import GTA5
 from model.build_BiSeNet import BiSeNet
