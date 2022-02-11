@@ -31,7 +31,7 @@ def eval(model,dataloader, args):
                 label = label.cuda()
             predict = model(data).squeeze()
             predict = reverse_one_hot(predict)
-            predict = np.array(predict)
+            predict = np.array(predict.cpu())
             img = colour_code_segmentation(predict, label_colors)
             img = Image.fromarray(img, 'RGB')
             img.save(os.path.join(args.predicted_labels_folder,name[0]+".png"))
@@ -39,14 +39,14 @@ def eval(model,dataloader, args):
             label = label.squeeze()
             if args.loss == 'dice':
                 label = reverse_one_hot(label)
-            label = np.array(label)
+            label = np.array(label.cpu())
 
             precision = compute_global_accuracy(predict, label)
             hist += fast_hist(label.flatten(), predict.flatten(), args.num_classes)
             precision_record.append(precision)
         tq.close()
         precision = np.mean(precision_record)
-        miou_list = per_class_iu(hist)[:-1]
+        miou_list = per_class_iu(hist)
         for i in range(len(classes)):
             print("IoU for class %s: %.3f" % (classes[i], miou_list[i]))
         miou = np.mean(miou_list)
@@ -65,7 +65,7 @@ def main(params):
     parser.add_argument('--batch_size', type=int, default=1, help='Number of images in each batch')
     parser.add_argument('--context_path', type=str, default="resnet101", help='The context path model you are using.')
     parser.add_argument('--cuda', type=str, default='0', help='GPU ids used for training')
-    parser.add_argument('--use_gpu', type=bool, default=False, help='Whether to user gpu for training')
+    parser.add_argument('--use_gpu', type=bool, default=True, help='Whether to user gpu for training')
     parser.add_argument('--num_classes', type=int, default=32, help='num of object classes (with void)')
     parser.add_argument('--loss', type=str, default='crossentropy', help='loss function, dice or crossentropy')
     parser.add_argument('--predicted_labels_folder', type=str, default="", help="Path to folder where to store predicted labels")
@@ -78,8 +78,6 @@ def main(params):
     # build model
     os.environ['CUDA_VISIBLE_DEVICES'] = args.cuda
     model = BiSeNet(args.num_classes, args.context_path)
-    if torch.cuda.is_available() and args.use_gpu:
-        model = torch.nn.DataParallel(model).cuda()
 
     print('load model from %s ...' % (os.path.join(args.checkpoint_path, args.pth_file)))
     checkpoint = torch.load((os.path.join(args.checkpoint_path, args.pth_file)))
@@ -88,6 +86,8 @@ def main(params):
         print ("The best epoch is {}". format(checkpoint['epoch']))
     
     model.load_state_dict(checkpoint['model_state_dict'])
+    if torch.cuda.is_available() and args.use_gpu:
+        model = torch.nn.DataParallel(model).cuda()
     print('Done!')
 
     eval(model, dataloader, args)

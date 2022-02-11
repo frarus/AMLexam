@@ -14,6 +14,7 @@ from utils import reverse_one_hot, compute_global_accuracy, fast_hist, \
     per_class_iu
 from loss import DiceLoss
 from dataset.Cityscapes import Cityscapes
+import matplotlib.pyplot as plt
 
 
 def val(args, model, dataloader):
@@ -47,7 +48,7 @@ def val(args, model, dataloader):
             precision_record.append(precision)
         
         precision = np.mean(precision_record)
-        miou_list = per_class_iu(hist)[:-1]
+        miou_list = per_class_iu(hist)
         miou = np.mean(miou_list)
         print('precision per pixel for test: %.3f' % precision)
         print('mIoU for validation: %.3f' % miou)
@@ -57,6 +58,8 @@ def val(args, model, dataloader):
 def train(args, model, optimizer, dataloader_train, dataloader_val):
 
     scaler = amp.GradScaler()
+
+    miou_list=[]
 
     if args.loss == 'dice':
         loss_func = DiceLoss()
@@ -107,6 +110,7 @@ def train(args, model, optimizer, dataloader_train, dataloader_val):
 
         if (epoch+1) % args.validation_step == 0:
             precision, miou = val(args, model, dataloader_val)
+            miou_list.append(miou)
             if miou > max_miou:
                 max_miou = miou
                 os.makedirs(args.save_model_path, exist_ok=True)
@@ -116,6 +120,10 @@ def train(args, model, optimizer, dataloader_train, dataloader_val):
                         'loss': loss,
                         'loss_record': loss_record},
                         os.path.join(args.save_model_path, 'best_crossentropy_loss.pth'))
+    plt.plot(range(args.num_epochs), miou_list)
+    plt.xlabel("Epoch #")
+    plt.ylabel("mIoU")
+    plt.savefig(os.path.join("/content/drive/MyDrive/figures","mIoU_per_epoch.png"))
 
 
 def main(params):
