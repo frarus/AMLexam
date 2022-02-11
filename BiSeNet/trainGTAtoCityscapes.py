@@ -91,6 +91,7 @@ def main(params):
     parser.add_argument("--gpu", type=int, default=0, help="choose gpu device.")
     parser.add_argument("--use_DSC", type=int, default=0, help="0 to not use DSC, 1 to use DSC.")
     parser.add_argument("--figure_name", type=str, default="", help="Name of image with mIoU plot. Could be DA or DA_DSC")
+    parser.add_argument("--transformation_on_source", type="str", default=None, help="Could be LAB or FDA. None means no transformation.")
 
     args = parser.parse_args(params)
 
@@ -98,7 +99,7 @@ def main(params):
 
     cudnn.enabled = True
 
-    train_dataset_source = GTA5(args.path_source)
+    train_dataset_source = GTA5(args.path_source, target_folder=args.path_target, transformation=args.transformation_on_source)
     train_dataset_target = Cityscapes (args.path_target)
     val_dataset = Cityscapes (args.path_target, train=False)
 
@@ -308,6 +309,7 @@ if __name__ == '__main__':
         '--optimizer', 'sgd',
         '--loss', 'crossentropy', 
         '--use_DSC', '0',
-        '--figure_name', 'mIoU_per_epoch_DA.png'
+        '--figure_name', 'mIoU_per_epoch_DA.png',
+        #'--transformation_on_source', 'FDA',
     ]
     main(params)
