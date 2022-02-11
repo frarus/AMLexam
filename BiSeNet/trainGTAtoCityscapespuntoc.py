@@ -171,6 +171,7 @@ def main(params):
 
     # Define here your dataloaders --> target dataloader has been moved
     dataloader_source = DataLoader(train_dataset_source, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers, drop_last=True)
+    dataloader_target = DataLoader(train_dataset_target, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers, drop_last=True) 
     dataloader_val = DataLoader(val_dataset, shuffle=False, num_workers=args.num_workers, batch_size=1)
 
     # Create network

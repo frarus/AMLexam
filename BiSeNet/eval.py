@@ -8,8 +8,23 @@ from utils import reverse_one_hot, compute_global_accuracy, fast_hist, per_class
 import tqdm
 from dataset.Cityscapes import Cityscapes
 
+from PIL import Image
+import json
+
+def colour_code_segmentation(image, label_values):
+  colour_codes = np.array(label_values)
+  x = image.astype(int)
+
+  final = np.zeros((x.shape[0], x.shape[1],3), np.ubyte)
+  x[x==255]=19
+  final[:,:]=colour_codes[x]
+  #print(final.shape)
+  return final
 
 def eval(model,dataloader, args):
+    label_info = json.load(open('/content/drive/MyDrive/Datasets/Cityscapes/info.json', 'r'))
+    
+    label_info=label_info['palette']
     print('start test!')
     with torch.no_grad():
         model.eval()
@@ -17,7 +32,7 @@ def eval(model,dataloader, args):
         tq = tqdm.tqdm(total=len(dataloader) * args.batch_size)
         tq.set_description('test')
         hist = np.zeros((args.num_classes, args.num_classes))
-        for i, (data, label, _, _) in enumerate(dataloader):
+        for i, (data, label, _, name) in enumerate(dataloader):
             tq.update(args.batch_size)
             if torch.cuda.is_available() and args.use_gpu:
                 data = data.cuda()
@@ -25,7 +40,9 @@ def eval(model,dataloader, args):
             predict = model(data).squeeze()
             predict = reverse_one_hot(predict)
             predict = np.array(predict)
-            # predict = colour_code_segmentation(np.array(predict), label_info)
+            img = colour_code_segmentation(predict, label_info)
+            img = Image.fromarray(img, 'RGB')
+            img.save("/content/drive/MyDrive/predicted_labels_step3"+name[0]+".png")
 
             label = label.squeeze()
             if args.loss == 'dice':
@@ -71,7 +88,7 @@ def main(params):
 
     # create dataset and dataloader here
     eval_dataset = Cityscapes (train=False)
-    dataloader = DataLoader(eval_dataset, shuffle=False)
+    dataloader = DataLoader(eval_dataset, shuffle=False, batch_size=1)
    
     # build model
     os.environ['CUDA_VISIBLE_DEVICES'] = args.cuda
@@ -96,7 +113,7 @@ if __name__ == '__main__':
         #LAST CASE
         #'--checkpoint_path', '/content/drive/MyDrive/checkpoints_101_sgd/latest_crossentropy_loss.pth',
         #BEST CASE
-        '--checkpoint_path', '/content/drive/MyDrive/checkpoints_101_sgd/best_crossentropy_loss.pth',
+        '--checkpoint_path', '/content/drive/MyDrive/checkpoints_101_sgd_da/best_crossentropy_loss.pth',
         '--data', '/path/to/data',
         '--cuda', '0',
         '--context_path', 'resnet101',
