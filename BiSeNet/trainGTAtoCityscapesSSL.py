@@ -340,7 +340,7 @@ if __name__ == '__main__':
         '--save_model_path', '/content/drive/MyDrive/checkpoints_101_sgd_da_DSC_withpseudolabels',
         '--context_path', 'resnet101',  # set resnet18 or resnet101, only support resnet18 and resnet101
         '--optimizer', 'sgd',
-        '--loss', 'crossentropy', #fine parametri train, ora metto quelli di train gta cityscapes
+        '--loss', 'crossentropy',
         '--figure_name', 'mIoU_per_epoch_DA_DSC_pseudo.png',
         #'--transformation_on_source', 'FDA',
     ]
