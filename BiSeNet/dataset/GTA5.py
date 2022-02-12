@@ -87,8 +87,7 @@ class GTA5(data.Dataset):
                 src_in_trg = FDA_source_to_target_np(image, targetimage, L=0.01)
                 image=src_in_trg.transpose((1,2,0))
                 image=toimage(image, cmin=0.0, cmax=255.0)
-                im=Image.fromarray(image, "RGB")  #da cancellare dopo un'epoca
-                im.save("/content/drive/MyDrive/FDA_source_images/"+name+".png") #da cancellare dopo un'epoca
+                image.save("/content/drive/MyDrive/FDA_source_images/"+name+".png") #da cancellare dopo un'epoca
             else:
                 image = np.asarray(image)/255 #/255 is needed to adjust the range
                 image_lab=color.rgb2lab(image)
