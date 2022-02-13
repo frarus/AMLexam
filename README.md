@@ -8,10 +8,12 @@ This contains:
 4. Two image-to-image transformations, to improve domain adaptation:
     * FDA;
     * LAB;
-5. Generation of pseudo-labels for the target domain, to further enhance domain adaptation. </br>
+5. Generation of pseudo-labels for the target domain, to further enhance domain adaptation. 
+6. A combination of LAB transformation and pseudo labels generation for the target domain.
+</br>
 The network BiSeNet is based on pytorch 0.4.1 and python 3.6
 
-The notebook "Real-time Domain Adaptation in Semantic Segmentation.ipynb" includes all the results.
+The notebook "Real-time Domain Adaptation in Semantic Segmentation.ipynb" includes all the results, except for the last one that is the "Real-time Domain Adaptation in Semantic Segmentation.ipynb (2)" notebook
 
 ## Train
 1. To train the the network BiSeNet:
@@ -39,6 +41,11 @@ python trainGTAtoCityscapes.py --use_DSC, 1 \
 5. To train applying the the FDA transformation on source data:
 ```
 python trainGTAtoCityscapesSSL.py 
+                               
+```  
+5. To train applying the the FDA transformation on source data:
+```
+python trainGTAtoCityscapesSSL.py --transformation_on_source, LAB
                                
 ```  
 
