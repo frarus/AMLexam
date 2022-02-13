@@ -87,7 +87,7 @@ class GTA5(data.Dataset):
                 src_in_trg = FDA_source_to_target_np(image, targetimage, L=0.01)
                 image=src_in_trg.transpose((1,2,0))
                 image=toimage(image, cmin=0.0, cmax=255.0)
-                image.save("/content/drive/MyDrive/FDA_source_images/"+name+".png") #da cancellare dopo un'epoca
+                image.save("/content/drive/MyDrive/FDA_source_images/"+name+".png") #can be deleted after one epoch, it's just to save transformed images
             else:
                 image = np.asarray(image)/255 #/255 is needed to adjust the range
                 image_lab=color.rgb2lab(image)
@@ -101,8 +101,8 @@ class GTA5(data.Dataset):
                 image_lab_transformed=((image_lab-mean_s)/std_s)*std_t+mean_t
                 image=color.lab2rgb(image_lab_transformed)*255 #*255 is needed to adjust the range
                 image = image.astype(np.uint8)
-                im = Image.fromarray(image, "RGB") #da cancellare dopo un'epoca
-                im.save("/content/drive/MyDrive/LAB_source_images/"+name+".png") #da cancellare dopo un'epoca
+                im = Image.fromarray(image, "RGB") #can be deleted after one epoch, it's just to save transformed images
+                im.save("/content/drive/MyDrive/LAB_source_images/"+name+".png") #can be deleted after one epoch, it's just to save transformed images
             image = np.asarray(image, np.float32)
 
         size = image.shape
