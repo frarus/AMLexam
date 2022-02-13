@@ -6,8 +6,8 @@ This contains:
 2. An implementation of an unsupervised adversarial domain adaptation algorithm;
 3. A variation of the unsupervised adversarial domain adaptation algorithm with lightweight depthwise-separable convolutions for the adversarial discriminator, which significantly reduce the total number of parameters and the total number of Floating Point Operations (FLOPS) of the model, making it suitable for mobile mobile and/or embedded devices;
 4. Two image-to-image transformations, to improve domain adaptation:
-  a) FDA;
-  b) LAB;
+    * FDA;
+    * LAB;
 5. Generation of pseudo-labels for the target domain, to further enhance domain adaptation. </br>
 The network BiSeNet is based on pytorch 0.4.1 and python 3.6
 
@@ -26,12 +26,12 @@ python trainGTAtoCityscapes.py
 ```
 python trainGTAtoCityscapes.py --use_DSC, 1
 ```  
-4. a. To train applying the FDA transformation on source data:
+4. To train applying the FDA transformation on source data:
 ```
 python trainGTAtoCityscapes.py --use_DSC, 1 \
                                --transformation_on_source, FDA
 ```  
-4. b. To train applying the LAB transformation on source data:
+To train applying the LAB transformation on source data:
 ```
 python trainGTAtoCityscapes.py --use_DSC, 1 \
                                --transformation_on_source, LAB
